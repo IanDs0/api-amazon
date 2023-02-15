@@ -1,0 +1,7 @@
+# Ignorar a pasta
+venv/
+__pycache__/
+.idea/
+
+# Ignorar o arquivo
+.env
