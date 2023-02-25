@@ -2,7 +2,7 @@
 
 `cd ./SDK_Amazon/paapi5-python-sdk-example`
 
-`pip install setup.py`
+`python setup.py install`
 
 #### instalar dependencias utilizadas
 
