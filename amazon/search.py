@@ -22,14 +22,14 @@ region = os.getenv('REGION')
 
 def json(retorno):
     price = float(retorno.offers.listings[0].price.display_amount.replace('R$', '').strip().replace('.', '').replace(',', '.'))
-    data = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')#nao foi utilizado o padrao GMT para depois transformar em GMT-3
     return {
-        "Asin": str(retorno.asin),
-        "DetailPageURL": str(retorno.detail_page_url),
-        "Title": str(retorno.item_info.title.display_value),
-        "BuyingPrice": float(price),
-        "Urlimage": str(retorno.images.primary.medium.url),
-        "DataTime": data
+        "product_store_id": str(retorno.asin),
+        "product_url": str(retorno.detail_page_url),
+        "product_name": str(retorno.item_info.title.display_value),
+        "product_price": float(price),
+        "product_loja": str("Amazon"),
+        "product_image_url": str(retorno.images.primary.medium.url),
+        "product_category": str("category"),
     }
 
 
@@ -41,7 +41,7 @@ def Search(Keywords, SearchIndex, ItemCount):
 
     keywords = Keywords
     search_index = SearchIndex
-    item_count = ItemCount
+    item_count = 2
     search_items_resource = [
         SearchItemsResource.ITEMINFO_CLASSIFICATIONS,
         SearchItemsResource.ITEMINFO_TITLE,
@@ -74,27 +74,34 @@ def Search(Keywords, SearchIndex, ItemCount):
         if response.search_result is not None:
             print("Printing first item information in SearchResult:")
             array_item = []
-            for item_0 in response.search_result.items:
-                if item_0 is not None:
-                    if item_0.detail_page_url is not None:
+            for item in response.search_result.items:
+                # print(item)
+                if item is not None:
+                    if item.detail_page_url is not None:
                         if (
-                                item_0.item_info is not None
-                                and item_0.item_info.title is not None
-                                and item_0.item_info.title.display_value is not None
+                                item.item_info is not None
+                                and item.item_info.title is not None
+                                and item.item_info.title.display_value is not None
                         ):
                             if (
-                                    item_0.offers is not None
-                                    and item_0.offers.listings is not None
-                                    and item_0.offers.listings[0].price is not None
-                                    and item_0.offers.listings[0].price.display_amount is not None
+                                    item.offers is not None
+                                    and item.offers.listings is not None
+                                    and item.offers.listings[0].price is not None
+                                    and item.offers.listings[0].price.display_amount is not None
                             ):
                                 if (
-                                        item_0.images is not None
-                                        and item_0.images.primary is not None
-                                        and item_0.images.primary.medium is not None
-                                        and item_0.images.primary.medium.url is not None
+                                        item.images is not None
+                                        and item.images.primary is not None
+                                        and item.images.primary.medium is not None
+                                        and item.images.primary.medium.url is not None
                                 ):
-                                    array_item.append(json(item_0))
+                                    # if (
+                                    #     item.item_info is not None
+                                    #     and item.item_info.classifications is not None
+                                    #     and item.item_info.classifications.binding is not None
+                                    #     and item.item_info.classifications.binding.display_value is not None
+                                    # ):
+                                        array_item.append(json(item))
 
             response.search_result = {
                 "Products": array_item

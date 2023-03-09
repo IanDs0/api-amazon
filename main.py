@@ -1,10 +1,18 @@
-from typing import Union
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import json
+from typing import Union
+import threading
+import schedule
 
 from src.amazon import Search
+from src.schedule import minha_rotina, thread_rotina
+
+
+schedule.every(8).hours.do(minha_rotina)
+
+thread = threading.Thread(target=thread_rotina)
+thread.start()
 
 
 app = FastAPI()
@@ -33,8 +41,6 @@ async def read_root(search: str, searchindex: Union[str, None] = None, itemcount
         itemCount = int(itemCount)
 
         response = (Search(keywords, searchIndex, itemCount))
-
-        print(type(response))
 
         if response.errors is not None:
             return {"Status": response.erros[0].code, "Mensagem": response.erros}

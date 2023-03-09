@@ -2,6 +2,11 @@
 venv/
 __pycache__/
 .idea/
+dist/
+build/
+paapi5_python_sdk.egg-info/
+.vscode/
+migrations/
 
 # Ignorar o arquivo
 .env
