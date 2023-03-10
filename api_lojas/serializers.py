@@ -5,23 +5,28 @@ from .models import Loja, Category, Product, Price
 class LojaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loja
-        fields = '__all__'
+        exclude = ['id']
 
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        exclude = ['id']
 
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Product
-        fields = '__all__'
+        exclude = ['id']
+        # fields = '__all__'
+
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    # product_loja = LojaSerializer()
+    # product_category = CategorySerializer()
     class Meta:
         model = Product
         fields = '__all__'

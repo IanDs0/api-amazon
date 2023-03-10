@@ -7,15 +7,21 @@ from rest_framework import status
 
 from api_lojas.models import Loja, Category, Product, Price
 from api_lojas.serializers import LojaSerializer, CategorySerializer, ProductSerializer, ProductDetailSerializer, PriceSerializer, PriceDetailSerializer
-from .search import Search
+from .search import search_name, search_asin
 
 import json
 
+def normalize_registration_product(product):
+
+    loja = Loja.objects.get(loja_name=product['product_loja'])
+    product['product_loja'] = loja.pk
+    category = Category.objects.get_or_create(category_name=product['product_category'])
+    product['product_category'] = category[0].id
+
+    return(product)
+
 @api_view(['GET'])
 def get_by_name(request, name):
-
-    searchindex = "All"
-    itemcount = 1
 
     if request.method == 'GET':
         try:
@@ -23,42 +29,62 @@ def get_by_name(request, name):
 
             serializer = ProductDetailSerializer(product, many=True)
 
-            if (request.GET['searchindex'] and request.GET['searchindex'] is not None) and (request.GET['itemcount'] and request.GET['itemcount'] is not None):
-                searchindex = request.GET['searchindex'] if request.GET['searchindex'] is not None and request.GET['searchindex'] != '' else 'All'
-                itemcount = request.GET['itemcount'] if request.GET['itemcount'] is not None and request.GET['itemcount'] !='' else 1
-
-
         except:
             return Response(serializer.data)
         
         if serializer.data == []:
 
             try:
-                response = Search(name.replace('-', ' '), str(searchindex), int(itemcount))
                 
-                print(response)
+                searchindex = request.GET.get('searchindex', 'All')
+                itemcount = request.GET.get('itemcount', 1)
 
+                response = search_name(name.replace('-', ' '), str(searchindex), int(itemcount))
+                responses={
+                    'response':[]
+                }
+
+                for i in range(len(response.search_result['Products'])):
+                    responses['response'].append(normalize_registration_product(response.search_result['Products'][i]))
+                
                 if response.errors != None:
                     return Response(status=response.errors[0].code)
+                
+                serializer = ProductSerializer(responses, many=True)
             
             except:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response(status=response)
 
-            return Response(serializer.data)
+            return Response(data=responses['response'], status=200)
         
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data)
 
     
-@api_view(['GET'])
-def get_by_asin(request, asin):
+@api_view(['POST'])
+def get_by_asin(request):
 
-    if request.method == 'GET':
-        try:
-            product = Product.objects.get(product_store_id=asin)
+    if request.method == 'POST':
         
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = ProductDetailSerializer(product)
+        if request.data != []:
 
+            try:
+
+                response = search_asin(tuple(request.data))
+                responses={
+                    'response':[]
+                }
+
+                for i in range(len(response.search_result['Products'])):
+                    responses['response'].append(normalize_registration_product(response.search_result['Products'][i]))
+                
+                if response.errors != None:
+                    return Response(status=response.errors[0].code)
+                
+                serializer = ProductSerializer(responses, many=True)
+            
+            except:
+                return Response(status=response)
+
+            return Response(data=responses['response'], status=200)
+        
         return Response(serializer.data)
