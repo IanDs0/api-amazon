@@ -153,7 +153,7 @@ def search_asin(SearchIndex):
         get_items_request = GetItemsRequest(
             partner_tag=partner_tag,
             partner_type=PartnerType.ASSOCIATES,
-            marketplace="www.amazon.com",
+            marketplace="www.amazon.com.br",
             condition=Condition.NEW,
             item_ids=item_ids,
             resources=get_items_resource,
@@ -167,14 +167,14 @@ def search_asin(SearchIndex):
         response = (api_instance.get_items(get_items_request))
 
         print("API called Successfully")
-        print("Comple te Response:", response)
+        # print("Comple te Response:", response.items_result)
 
         """ Parse response """
-        if response.search_result is not None:
+        if response.items_result is not None:
             print("Printing first item information in SearchResult:")
             array_item = []
             category = ""
-            for item in response.search_result.items:
+            for item in response.items_result.items:
                 if item is not None:
                     if item.detail_page_url is not None:
                         if (
@@ -203,7 +203,7 @@ def search_asin(SearchIndex):
                                 ):
                                     array_item.append(json(item, category))
 
-            response.search_result = {
+            response.items_result = {
                 "Products": array_item
             }
             return response

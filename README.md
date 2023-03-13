@@ -1,13 +1,17 @@
-#### instalar o SDK da Amazon utilizada
+### instalar o SDK da Amazon utilizada
+
+## Windows
 
 `cd ./SDK_Amazon/paapi5-python-sdk-example`
 
-`python setup.py install`
+`python3 setup.py install`
 
-#### instalar dependencias utilizadas
+### instalar dependencias utilizadas
+
+## Windows
 
 `pip install -r requirements.txt`
 
-### fazer a busca na API
+### Reun server na porta 8000
 
-`uvicorn main:app --reload`
+`python3 manage.py runserver 0.0.0.0:8000`
