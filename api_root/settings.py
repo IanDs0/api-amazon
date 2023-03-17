@@ -141,9 +141,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Celery
 
-# CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_BROKER_URL = 'redis://localhost:6379'
 
-CELERY_BROKER_URL = 'redis://redis:6379'
+# CELERY_BROKER_URL = 'redis://redis:6379'
 
 CELERY_ACCEPT_CONTENT = ['application/json']
 
