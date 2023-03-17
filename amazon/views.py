@@ -77,7 +77,8 @@ def get_by_name(request, name):
                 
                 serializer = ProductSerializer(responses, many=True)
             
-            except:
+            except Exception as e:
+                print(e)
                 return Response(status=response)
 
             return Response(data=responses['response'], status=200)
@@ -107,8 +108,6 @@ def get_by_asin(request):
     if request.method == 'POST':
         
         if request.data['asin'] != [] and type(request.data['asin']) == type([]):
-
-            print(request.data['asin'])
 
             try:
 

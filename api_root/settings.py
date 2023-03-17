@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-o@+^(0l#le3#ol*4)&(5^)^402imo@j@8&_-#6xph!l-0u1h0)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_celery_results',
 
     "rest_framework",
     "corsheaders",
@@ -130,11 +132,23 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ALLOW_ORIGINS = [
-    # 'https://',
-    'http://localhost:3000',
-    'http://127.0.0.1:8080',
-    'http://localhost:80'
-]
+# CORS_ALLOW_ORIGINS = [
+#     # 'https://',
+# ]
+
+
+# Celery
+
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+
+CELERY_BROKER_URL = 'redis://redis:6379'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TASK_SERIALIZER = 'json'
