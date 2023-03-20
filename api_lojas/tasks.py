@@ -7,6 +7,9 @@ from amazon.search import search_asin
 from api_lojas.models import Loja, Category, Product, Price
 from api_lojas.serializers import LojaSerializer, CategorySerializer, ProductSerializer, ProductDetailSerializer, PriceSerializer, PriceDetailSerializer
 
+from amazon.models import Asin
+from amazon.serializers import AsinSerializer
+
 def normalize_registration_product(product):
 
     loja = Loja.objects.get(loja_name=product['product_loja'])
@@ -26,7 +29,6 @@ def criate_price_for_product(product):
         return False
     if serializer.is_valid():
         prodc = Product.objects.get_or_create(**serializer.validated_data)
-        print(prodc[0].id)
 
         data_price = {
             'price_product': prodc[0].id,
@@ -38,35 +40,39 @@ def criate_price_for_product(product):
         if serializer.is_valid():
             price = serializer.save()
             # prices = Price.objects.get_or_create(**serializer.validated_data)
-            print(price.id)
 
 def amazon():
 
-    # criar um banco de dados para os asin
-    asin = [
-        "059035342X", 
-        "B0942NDQKL", 
-        "B00ZV9RDKK"
-    ]
+    # asind e exempos "059035342X", "B0942NDQKL" e "B00ZV9RDKK"
+    asin = []
 
-    try:
+    for ASIN in Asin.objects.all():
+        asin.append(ASIN.asin_code)
 
-        response = search_asin(asin)
-        responses={
-            'response':[]
-        }
+    print(asin)
 
-        for i in range(len(response.items_result['Products'])):
-            responses['response'].append(normalize_registration_product(response.items_result['Products'][i]))
-            criate_price_for_product(responses['response'][i])
+    if asin:
 
-        if response.errors != None:
-            return "Erro API Amazon " + str(response.errors[0].code)
+        try:
+
+            response = search_asin(asin)
+            responses={
+                'response':[]
+            }
+
+            for i in range(len(response.items_result['Products'])):
+                responses['response'].append(normalize_registration_product(response.items_result['Products'][i]))
+                criate_price_for_product(responses['response'][i])
+
+            if response.errors != None:
+                return "Erro API Amazon " + str(response.errors[0].code)
+            
+        except:
+            return "Erro ao buscar produtos na Amazon"
         
-    except:
-        return "Erro ao buscar produtos na Amazon"
-    
-    return "OK"
+        return "OK"
+    else:
+        return "Nenhum ASIN cadastrado"
 
 @shared_task
 def map_products():

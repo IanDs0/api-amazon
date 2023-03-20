@@ -19,7 +19,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     product_store_id = models.CharField(max_length=10, null=False)
-    product_name = models.CharField(max_length=100, null=False)
+    product_name = models.CharField(max_length=200, null=False)
     product_url = models.URLField(max_length=200, null=False)
     product_image_url = models.URLField(max_length=200, null=False)
     # product_description = models.TextField(null=False)
