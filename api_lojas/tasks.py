@@ -20,26 +20,36 @@ def normalize_registration_product(product):
     return(product)
 
 def criate_price_for_product(product):
-
-    data_product = product
-    price = data_product.pop('product_price')
-    serializer = ProductSerializer(data=data_product)
-    if not serializer.is_valid():
+    try:
+        existing_product = Product.objects.get(product_store_id=product['product_store_id'])
+        old_price = existing_product.product_price
+        existing_product.product_old_price = old_price
+        existing_product.product_price = product['product_price']
+        existing_product.save()
+    except Product.DoesNotExist:
+        serializer = ProductSerializer(data=product)
+        if serializer.is_valid():
+            serializer.save()
+            existing_product = serializer.instance
+            old_price = existing_product.product_price
+            existing_product.product_old_price = old_price
+            existing_product.save()
+        else:
+            print(serializer.errors)
+            return False
+    
+    data_price = {
+        'price_product': existing_product.id,
+        'price_value': existing_product.product_price
+    }
+    serializer = PriceSerializer(data=data_price)
+    if serializer.is_valid():
+        serializer.save()
+        product['product_old_price'] = existing_product.product_price
+        return True
+    else:
         print(serializer.errors)
         return False
-    if serializer.is_valid():
-        prodc = Product.objects.get_or_create(**serializer.validated_data)
-
-        data_price = {
-            'price_product': prodc[0].id,
-            'price_value': price
-        }
-        serializer = PriceSerializer(data=data_price)
-        if not serializer.is_valid():
-            print(serializer.errors)
-        if serializer.is_valid():
-            price = serializer.save()
-            # prices = Price.objects.get_or_create(**serializer.validated_data)
 
 def amazon():
 

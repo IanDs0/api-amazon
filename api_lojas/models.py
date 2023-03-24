@@ -22,6 +22,8 @@ class Product(models.Model):
     product_name = models.CharField(max_length=200, null=False)
     product_url = models.URLField(max_length=200, null=False)
     product_image_url = models.URLField(max_length=200, null=False)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0.00)
+    product_old_price = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0.00)
     # product_description = models.TextField(null=False)
     product_loja = models.ForeignKey(Loja, on_delete=models.PROTECT, related_name='Products', null=False)
     product_category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='Products', null=False)

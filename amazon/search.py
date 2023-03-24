@@ -31,6 +31,7 @@ def json(retorno, category):
         "product_url": str(retorno.detail_page_url),
         "product_name": str(retorno.item_info.title.display_value),
         "product_price": float(price),
+        "product_old_price": 0.00,
         "product_loja": str("amazon"),
         "product_image_url": str(retorno.images.primary.medium.url),
         "product_category": str(category),

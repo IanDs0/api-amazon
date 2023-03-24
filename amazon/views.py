@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from api_lojas.models import Loja, Category, Product, Price
-from api_lojas.serializers import LojaSerializer, CategorySerializer, ProductSerializer, ProductDetailSerializer, PriceSerializer, PriceDetailSerializer
+from api_lojas.serializers import LojaSerializer, CategorySerializer, ProductSerializer, ProductDetailSerializer, PriceSerializer, PriceDetailSerializer, PriceMinimalSerializer
 from .search import search_name, search_asin
 
 import json
@@ -21,29 +21,75 @@ def normalize_registration_product(product):
     return(product)
 
 def criate_price_for_product(product):
-
-    data_product = product
-    price = data_product.pop('product_price')
-    serializer = ProductSerializer(data=data_product)
-    if not serializer.is_valid():
+    try:
+        existing_product = Product.objects.get(product_store_id=product['product_store_id'])
+        old_price = existing_product.product_price
+        existing_product.product_old_price = old_price
+        existing_product.product_price = product['product_price']
+        existing_product.save()
+    except Product.DoesNotExist:
+        serializer = ProductSerializer(data=product)
+        if serializer.is_valid():
+            serializer.save()
+            existing_product = serializer.instance
+            old_price = existing_product.product_price
+            existing_product.product_old_price = old_price
+            existing_product.save()
+        else:
+            print(serializer.errors)
+            return False
+    
+    data_price = {
+        'price_product': existing_product.id,
+        'price_value': existing_product.product_price
+    }
+    serializer = PriceSerializer(data=data_price)
+    if serializer.is_valid():
+        serializer.save()
+        product['product_old_price'] = existing_product.product_price
+        return True
+    else:
         print(serializer.errors)
         return False
-    if serializer.is_valid():
-        prodc = Product.objects.get_or_create(**serializer.validated_data)
-        print(prodc[0].id)
 
-        data_price = {
-            'price_product': prodc[0].id,
-            'price_value': price
-        }
-        serializer = PriceSerializer(data=data_price)
-        if not serializer.is_valid():
-            print(serializer.errors)
-        if serializer.is_valid():
-            price = serializer.save()
-            # prices = Price.objects.get_or_create(**serializer.validated_data)
-            print(price.id)
 
+
+@api_view(['GET'])
+def get_all_product(request):
+    if request.method == 'GET':
+        try:
+            stories = Loja.objects.filter(loja_name = 'amazon')
+            if stories == []:
+                return Response(status= status.HTTP_400_BAD_REQUEST)
+            products = Product.objects.filter(product_loja = stories[0])
+            products = products.order_by('-product_price')
+            serializer = ProductDetailSerializer(products, many=True)
+        except:
+            return Response(status= status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_all_category(request):
+    if request.method == 'GET':
+        try:
+            category = Category.objects.all()
+            serializer = CategorySerializer(category, many=True)
+        except:
+            return Response(status= status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def get_by_category(request, name):
+
+    if request.method == 'GET':
+        try:
+            category = Category.objects.filter(category_name=name.replace('-', ' '))
+            products = Product.objects.filter(product_category = category[0].id)
+            serializer = ProductSerializer(products, many=True)
+        except:
+            return Response(status= status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
 
 @api_view(['GET'])
 def get_by_name(request, name):
@@ -77,15 +123,13 @@ def get_by_name(request, name):
                 
                 serializer = ProductSerializer(responses, many=True)
             
-            except Exception as e:
-                print(e)
+            except:
                 return Response(status=response)
 
             return Response(data=responses['response'], status=200)
         
         return Response(serializer.data)
 
-    
 @api_view(['GET','POST'])
 def get_by_asin(request):
 
@@ -97,7 +141,7 @@ def get_by_asin(request):
             prices = Price.objects.filter(price_product = product.id)
             
             try:
-                serializer = PriceSerializer(prices, many=True)
+                serializer = PriceMinimalSerializer(prices, many=True)
                 return Response(serializer.data)
             except:
                 return Response(status= status.HTTP_400_BAD_REQUEST)
@@ -119,7 +163,9 @@ def get_by_asin(request):
 
                 for i in range(len(response.items_result['Products'])):
                     responses['response'].append(normalize_registration_product(response.items_result['Products'][i]))
-                    criate_price_for_product(responses['response'][i])
+                    price=criate_price_for_product(responses['response'][i])
+                    print(price)
+                    # responses['response'][i]['product_old_price']=10.0
 
                 if response.errors != None:
                     return Response(status=response.errors[0].code)

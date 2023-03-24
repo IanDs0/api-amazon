@@ -32,7 +32,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
-
+class PriceMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Price
+        fields = ['price_value', 'price_date']
 
 class PriceSerializer(serializers.ModelSerializer):
     class Meta:
