@@ -1,6 +1,6 @@
 *.md
 *.sql.gz
-# *.sqlite3
+*.sqlite3
 .idea
 .gitignore
 __pycache__

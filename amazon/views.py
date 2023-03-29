@@ -64,9 +64,9 @@ def get_all_product(request):
             products = Product.objects.filter(product_loja = stories[0])
             products = products.order_by('-product_price')
             serializer = ProductDetailSerializer(products, many=True)
+            return Response(serializer.data)
         except:
             return Response(status= status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -75,21 +75,23 @@ def get_all_category(request):
         try:
             category = Category.objects.all()
             serializer = CategorySerializer(category, many=True)
+            return Response(serializer.data)
         except:
             return Response(status= status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data)
 
 @api_view(['GET'])
 def get_by_category(request, name):
-
     if request.method == 'GET':
         try:
             category = Category.objects.filter(category_name=name.replace('-', ' '))
             products = Product.objects.filter(product_category = category[0].id)
-            serializer = ProductSerializer(products, many=True)
+            try:
+                serializer = ProductSerializer(products, many=True)
+                return Response(serializer.data)
+            except:
+                return Response(status= status.HTTP_500_INTERNAL_SERVER_ERROR)
         except:
             return Response(status= status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data)
 
 @api_view(['GET'])
 def get_by_name(request, name):
@@ -98,37 +100,40 @@ def get_by_name(request, name):
         try:
             product = Product.objects.filter(product_name=name.replace('-', ' '))
 
-            serializer = ProductDetailSerializer(product, many=True)
-
-        except:
-            return Response(serializer.data)
-        
-        if serializer.data == []:
-
             try:
-                
-                searchindex = request.GET.get('searchindex', 'All')
-                itemcount = request.GET.get('itemcount', 1)
+                serializer = ProductDetailSerializer(product, many=True)
 
-                response = search_name(name.replace('-', ' '), str(searchindex), int(itemcount))
-                responses={
-                    'response':[]
-                }
-
-                for i in range(len(response.search_result['Products'])):
-                    responses['response'].append(normalize_registration_product(response.search_result['Products'][i]))
-                
-                if response.errors != None:
-                    return Response(status=response.errors[0].code)
-                
-                serializer = ProductSerializer(responses, many=True)
-            
-            except:
-                return Response(status=response)
-
-            return Response(data=responses['response'], status=200)
         
-        return Response(serializer.data)
+        
+                if serializer.data == []:
+
+                    try:
+                        
+                        searchindex = request.GET.get('searchindex', 'All')
+                        itemcount = request.GET.get('itemcount', 1)
+
+                        response = search_name(name.replace('-', ' '), str(searchindex), int(itemcount))
+                        responses={
+                            'response':[]
+                        }
+
+                        for i in range(len(response.search_result['Products'])):
+                            responses['response'].append(normalize_registration_product(response.search_result['Products'][i]))
+                        
+                        if response.errors != None:
+                            return Response(status=response.errors[0].code)
+                        
+                        serializer = ProductSerializer(responses, many=True)
+                    
+                    except:
+                        return Response(status=response)
+
+                    return Response(data=responses['response'], status=200)
+
+            except:
+                return Response(status= status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(status= status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','POST'])
 def get_by_asin(request):
@@ -137,14 +142,17 @@ def get_by_asin(request):
 
         prduct_asin = request.GET.get('prduct', '')
         if prduct_asin != '':
-            product = Product.objects.get(product_store_id = prduct_asin)
-            prices = Price.objects.filter(price_product = product.id)
-            
             try:
-                serializer = PriceMinimalSerializer(prices, many=True)
-                return Response(serializer.data)
+                product = Product.objects.get(product_store_id = prduct_asin)
+                prices = Price.objects.filter(price_product = product.id)
+                
+                try:
+                    serializer = PriceMinimalSerializer(prices, many=True)
+                    return Response(serializer.data)
+                except:
+                    return Response(status= status.HTTP_400_BAD_REQUEST)
             except:
-                return Response(status= status.HTTP_400_BAD_REQUEST)
+                return Response(status= status.HTTP_404_NOT_FOUND)
 
         return Response(status= status.HTTP_404_NOT_FOUND)
 
@@ -161,21 +169,27 @@ def get_by_asin(request):
                 }
                 res = []
 
-                for i in range(len(response.items_result['Products'])):
-                    responses['response'].append(normalize_registration_product(response.items_result['Products'][i]))
-                    price=criate_price_for_product(responses['response'][i])
-                    print(price)
-                    # responses['response'][i]['product_old_price']=10.0
+                try:
+                    for i in range(len(response.items_result['Products'])):
+                        responses['response'].append(normalize_registration_product(response.items_result['Products'][i]))
+                        price=criate_price_for_product(responses['response'][i])
+                        print(price)
+                        # responses['response'][i]['product_old_price']=10.0
 
-                if response.errors != None:
-                    return Response(status=response.errors[0].code)
+                    if response.errors != None:
+                        return Response(status=response.errors[0].code)
                 
+                except:
+                    return Response(status= status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             except:
                 return Response(status=response)
             
-            serializer = ProductSerializer(responses, many=True)
-            # print(serializer)
+            try:
+                serializer = ProductSerializer(responses, many=True)
+
+            except:
+                return Response(status= status.HTTP_400_BAD_REQUEST)
 
             return Response(data=responses['response'], status=200)
         
