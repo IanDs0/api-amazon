@@ -1,17 +1,39 @@
-### instalar o SDK da Amazon utilizada
+# API de Busca de Produtos da Amazon
 
-## Windows
+## Rotas da API
+GET `/`
 
-`cd ./SDK_Amazon/paapi5-python-sdk-example`
+- Retorna todas as lojas da API.
 
-`python3 setup.py install`
+GET `/amazon/protudo-buscado?searchindex=category&itemcount=n`
 
-### instalar dependencias utilizadas
+- Retorna "n" produtos buscados da categoria "category" na Amazon.
 
-## Windows
+- Os parâmetros searchindex e itemcount na URL não são obrigatórios.
 
-`pip install -r requirements.txt`
+- searchindex tem valor padrão de "all" e deve receber uma string.
 
-### Reun server na porta 8000
+- itemcount tem valor padrão de 1 e deve receber um inteiro.
 
-`python3 manage.py runserver 0.0.0.0:8000`
+POST `/amazon/asin/?prduct=p`
+
+- Deve ter um "product" com o valor de um asin.
+
+- Retorna o hitórico de precos do produto.
+
+POST `/amazon/asin/`
+
+- Deve ter um valor no body de nome "asin" que possua os valores na estrutura de dados array.
+
+- Retorna os dados dos ASIN que estavam no array de busca e escreve esses produtos no banco.
+
+## Dependências
+- Python `3.11.2`
+
+- SDK da Amazon utilizada
+  - `cd ./SDK_Amazon/paapi5-python-sdk-example`
+  - `python setup.py install`
+- Dependências utilizadas
+  - `pip install -r requirements.txt`
+- Para executar o servidor na porta `8000`:
+  - `python3 manage.py runserver 0.0.0.0:8000`
