@@ -1,0 +1,47 @@
+version: "3.8"
+   
+services:
+  django:
+    build: .
+    container_name: django
+    command: bash -c "\python3 manage.py makemigrations && (python3 manage.py migrate && (python manage.py runserver 0.0.0.0:8000))"
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - POSTGRES_DB=db
+    depends_on:
+      - db
+      - redis
+  celery:
+    build: .
+    command: bash -c "\celery -A api_root worker -l info & celery -A api_root beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - django
+      - redis
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+  redis:
+    image: "redis:alpine"
+        
+volumes:
+  pgdata:

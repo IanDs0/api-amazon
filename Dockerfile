@@ -16,6 +16,6 @@ COPY . .
 
 RUN rm -r SDK_Amazon
 
-RUN python3 manage.py makemigrations
+# RUN python3 manage.py makemigrations
 
 EXPOSE 8000

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o@+^(0l#le3#ol*4)&(5^)^402imo@j@8&_-#6xph!l-0u1h0)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("CELERY_BROKER", True)
 
 ALLOWED_HOSTS = ['*']
 
@@ -85,9 +86,17 @@ WSGI_APPLICATION = 'api_root.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': os.environ.get("POSTGRES_DB", "db"),
+        'PORT': '5432',
     }
 }
 
@@ -144,7 +153,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # CELERY_BROKER_URL = 'redis://localhost:6379'
 
-CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 
 CELERY_ACCEPT_CONTENT = ['application/json']
 
