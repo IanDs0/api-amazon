@@ -4,7 +4,7 @@
         "builder": "NIXPACKS"
     },
     "deploy": {
-        "startCommand": "python manage.py makemigrations && python manage.py migrate && python manage.py runserver && celery -A api_root worker -l info && celery -A api_root beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler && gunicorn api_root.wsgi",
+        "startCommand": "python manage.py migrate && gunicorn api_root.wsgi ",
         "restartPolicyType": "ON_FAILURE",
         "restartPolicyMaxRetries": 10
     }
