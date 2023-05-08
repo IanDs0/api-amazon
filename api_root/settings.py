@@ -153,8 +153,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # CELERY_BROKER_URL = 'redis://localhost:6379'
 
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379")
 
 CELERY_ACCEPT_CONTENT = ['application/json']
 
