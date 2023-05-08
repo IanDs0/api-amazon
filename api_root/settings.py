@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o@+^(0l#le3#ol*4)&(5^)^402imo@j@8&_-#6xph!l-0u1h0)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("CELERY_BROKER", True)
+DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ['*']
 
@@ -92,11 +92,11 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': os.environ.get("POSTGRES_DB", "db"),
-        'PORT': '5432',
+        'NAME': os.environ.get("PGDATABASE","postgres"),
+        'USER': os.environ.get("PGUSER","postgres"),
+        'PASSWORD': os.environ.get("PGPASSWORD","postgres"),
+        'HOST': os.environ.get("PGHOST","db"),
+        'PORT': os.environ.get("PGPORT","5432"),
     }
 }
 
