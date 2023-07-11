@@ -95,7 +95,7 @@ DATABASES = {
         'NAME': os.environ.get("PGDATABASE","postgres"),
         'USER': os.environ.get("PGUSER","postgres"),
         'PASSWORD': os.environ.get("PGPASSWORD","postgres"),
-        'HOST': os.environ.get("PGHOST","db"),
+        'HOST':os.environ.get("PGHOST","localhost"),
         'PORT': os.environ.get("PGPORT","5432"),
     }
 }
@@ -143,11 +143,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
-
-# CORS_ALLOW_ORIGINS = [
-#     # 'https://',
-# ]
-
 
 # Celery
 
